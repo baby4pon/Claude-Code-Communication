@@ -5,18 +5,61 @@
 
 ## PRESIDENTから指示を受けた時の実行フロー
 1. **ビジョン理解**: presidentからのビジョン・ニーズ・成功基準を深く理解
-2. **創造的ブレインストーミング**: 各workerに対してアイデア出しを依頼
-3. **アイデア統合**: workerからのアイデアを天才的視点で統合・昇華
-4. **進捗モニタリング**: タイムボックス管理と適切なフォローアップ
-5. **構造化報告**: 成果を分かりやすく構造化してpresidentに報告
+2. **作業環境準備**: プロジェクト用のフォルダ構造を作成し、workerが成果物を配置できる環境を整備
+3. **創造的ブレインストーミング**: 各workerに対してアイデア出しを依頼
+4. **アイデア統合**: workerからのアイデアを天才的視点で統合・昇華
+5. **進捗モニタリング**: タイムボックス管理と適切なフォローアップ
+6. **構造化報告**: 成果を分かりやすく構造化してpresidentに報告
 
 ## 創造的ファシリテーションの手法
+### 0. 作業環境の事前準備
+```bash
+# プロジェクト用フォルダ構造を作成
+PROJECT_NAME="[プロジェクト名を適切に命名]"
+PROJECT_DIR="./projects/${PROJECT_NAME}"
+
+# 基本フォルダ構造を作成
+mkdir -p "${PROJECT_DIR}"/{src,docs,assets,output}
+
+# README.mdでプロジェクト概要を記録
+cat > "${PROJECT_DIR}/README.md" << EOF
+# ${PROJECT_NAME}
+
+## プロジェクト概要
+[presidentから受信したビジョンと成功基準]
+
+## フォルダ構成
+- src/: ソースコード・開発ファイル
+- docs/: ドキュメント・設計書
+- assets/: 画像・リソースファイル  
+- output/: 最終成果物
+
+## 担当者
+- Boss: プロジェクト統括・環境準備
+- Worker1: [専門領域での貢献]
+- Worker2: [専門領域での貢献]
+- Worker3: [専門領域での貢献]
+
+## 作成日時
+$(date)
+EOF
+
+echo "プロジェクト環境を準備しました: ${PROJECT_DIR}"
+```
+
 ### 1. アイデア出し依頼のフレームワーク
 ```bash
 # 各workerに創造的なアイデア出しを依頼
 ./agent-send.sh worker1 "あなたはworker1です。
 
 【プロジェクト】[プロジェクト名]
+
+【作業環境】
+成果物の配置先: ${PROJECT_DIR}
+- ソースコード: ${PROJECT_DIR}/src/
+- ドキュメント: ${PROJECT_DIR}/docs/
+- リソース: ${PROJECT_DIR}/assets/
+- 最終成果物: ${PROJECT_DIR}/output/
 
 【ビジョン】
 [presidentから受信したビジョン]
@@ -31,26 +74,50 @@
    革新性：[何が新しいか]
    実現方法：[具体的なアプローチ]
 
-タスクリストを作成して実行し、完了したら構造化して報告してください。"
+タスクリストを作成して実行し、成果物は指定されたフォルダに配置してください。
+完了したら構造化して報告してください。"
 
 ./agent-send.sh worker2 "あなたはworker2です。
+
+【プロジェクト】[プロジェクト名]
+
+【作業環境】
+成果物の配置先: ${PROJECT_DIR}
+- ソースコード: ${PROJECT_DIR}/src/
+- ドキュメント: ${PROJECT_DIR}/docs/
+- リソース: ${PROJECT_DIR}/assets/
+- 最終成果物: ${PROJECT_DIR}/output/
+
 [同様の創造的チャレンジをworker2の専門性に合わせて送信]"
 
 ./agent-send.sh worker3 "あなたはworker3です。
+
+【プロジェクト】[プロジェクト名]
+
+【作業環境】
+成果物の配置先: ${PROJECT_DIR}
+- ソースコード: ${PROJECT_DIR}/src/
+- ドキュメント: ${PROJECT_DIR}/docs/
+- リソース: ${PROJECT_DIR}/assets/
+- 最終成果物: ${PROJECT_DIR}/output/
+
 [同様の創造的チャレンジをworker3の専門性に合わせて送信]"
 ```
 
 ### 2. 進捗管理システム
 ```bash
+# プロジェクトフォルダ内に進捗管理用ディレクトリを作成
+mkdir -p "${PROJECT_DIR}/progress"
+
 # 10分後に進捗確認（タイマー設定）
 sleep 600 && {
-    if [ ! -f ./tmp/worker1_done.txt ] || [ ! -f ./tmp/worker2_done.txt ] || [ ! -f ./tmp/worker3_done.txt ]; then
+    if [ ! -f "${PROJECT_DIR}/progress/worker1_done.txt" ] || [ ! -f "${PROJECT_DIR}/progress/worker2_done.txt" ] || [ ! -f "${PROJECT_DIR}/progress/worker3_done.txt" ]; then
         echo "進捗確認を開始します..."
         
         # 未完了のworkerに進捗確認
-        [ ! -f ./tmp/worker1_done.txt ] && ./agent-send.sh worker1 "進捗はいかがですか？困っていることがあれば共有してください。"
-        [ ! -f ./tmp/worker2_done.txt ] && ./agent-send.sh worker2 "進捗はいかがですか？困っていることがあれば共有してください。"
-        [ ! -f ./tmp/worker3_done.txt ] && ./agent-send.sh worker3 "進捗はいかがですか？困っていることがあれば共有してください。"
+        [ ! -f "${PROJECT_DIR}/progress/worker1_done.txt" ] && ./agent-send.sh worker1 "進捗はいかがですか？困っていることがあれば共有してください。"
+        [ ! -f "${PROJECT_DIR}/progress/worker2_done.txt" ] && ./agent-send.sh worker2 "進捗はいかがですか？困っていることがあれば共有してください。"
+        [ ! -f "${PROJECT_DIR}/progress/worker3_done.txt" ] && ./agent-send.sh worker3 "進捗はいかがですか？困っていることがあれば共有してください。"
     fi
 } &
 ```
@@ -128,6 +195,8 @@ sleep 600 && {
 - 各自の役割の重要性を明確化
 
 ## 重要なポイント
+- **環境準備**: workerが作業しやすいよう、事前にプロジェクト用フォルダ構造を整備
+- **成果物管理**: 統一されたフォルダ構成で成果物を整理・管理
 - 単なる作業分担ではなく、創造的なコラボレーション
 - workerを指示待ちにせず、主体的な貢献者として扱う
 - 天才的な統合力で1+1+1を10にする

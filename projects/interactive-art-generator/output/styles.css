@@ -1,0 +1,150 @@
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background: linear-gradient(135deg, #0c0c0c 0%, #1a1a2e 50%, #16213e 100%);
+    color: white;
+    overflow: hidden;
+    height: 100vh;
+}
+
+.container {
+    position: relative;
+    width: 100vw;
+    height: 100vh;
+}
+
+#artCanvas {
+    position: absolute;
+    top: 0;
+    left: 0;
+    cursor: none;
+    background: transparent;
+}
+
+.controls {
+    position: absolute;
+    top: 20px;
+    left: 20px;
+    z-index: 100;
+    background: rgba(0, 0, 0, 0.7);
+    backdrop-filter: blur(10px);
+    border-radius: 15px;
+    padding: 20px;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    transition: opacity 0.3s ease;
+}
+
+.controls:hover {
+    opacity: 1;
+}
+
+.info h1 {
+    font-size: 1.5em;
+    margin-bottom: 5px;
+    background: linear-gradient(45deg, #ff6b6b, #4ecdc4, #45b7d1, #96ceb4);
+    background-size: 300% 300%;
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    animation: gradientShift 3s ease-in-out infinite;
+}
+
+.info p {
+    font-size: 0.9em;
+    opacity: 0.8;
+    margin-bottom: 15px;
+}
+
+.control-panel {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.control-panel label {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-size: 0.85em;
+}
+
+.control-panel input[type="range"] {
+    width: 120px;
+    height: 5px;
+    border-radius: 3px;
+    background: linear-gradient(to right, #4ecdc4, #45b7d1);
+    outline: none;
+    -webkit-appearance: none;
+}
+
+.control-panel input[type="range"]::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    width: 15px;
+    height: 15px;
+    border-radius: 50%;
+    background: #fff;
+    cursor: pointer;
+    box-shadow: 0 0 10px rgba(255, 255, 255, 0.5);
+}
+
+.control-panel input[type="checkbox"] {
+    width: 18px;
+    height: 18px;
+    accent-color: #4ecdc4;
+}
+
+.control-panel button {
+    padding: 8px 16px;
+    background: linear-gradient(45deg, #ff6b6b, #4ecdc4);
+    border: none;
+    border-radius: 8px;
+    color: white;
+    font-weight: bold;
+    cursor: pointer;
+    transition: transform 0.2s ease;
+}
+
+.control-panel button:hover {
+    transform: scale(1.05);
+}
+
+.control-panel button:active {
+    transform: scale(0.95);
+}
+
+@keyframes gradientShift {
+    0%, 100% { background-position: 0% 50%; }
+    50% { background-position: 100% 50%; }
+}
+
+/* レスポンシブ対応 */
+@media (max-width: 768px) {
+    .controls {
+        top: 10px;
+        left: 10px;
+        right: 10px;
+        padding: 15px;
+    }
+    
+    .info h1 {
+        font-size: 1.2em;
+    }
+    
+    .control-panel {
+        flex-direction: row;
+        flex-wrap: wrap;
+        gap: 8px;
+    }
+    
+    .control-panel label {
+        font-size: 0.8em;
+    }
+    
+    .control-panel input[type="range"] {
+        width: 80px;
+    }
+}

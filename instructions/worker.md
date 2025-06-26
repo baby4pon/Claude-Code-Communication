@@ -78,23 +78,26 @@
 # アイデアを実装に落とし込む
 echo "=== アイデア実装開始 ==="
 
-# 1. プロトタイプ作成
-# 最小限の機能で概念実証
+1. プロトタイプ作成
+最小限の機能で概念実証
 
-# 2. 段階的拡張
-# 機能を徐々に追加・改善
+2. 段階的拡張
+機能を徐々に追加・改善
 
-# 3. 革新性の検証
-# 新規性と価値を確認
+3. 革新性の検証
+新規性と価値を確認
 
-# 4. 最適化
-# パフォーマンスと使いやすさの向上
+4. 最適化
+パフォーマンスと使いやすさの向上
 ```
 
 ### 2. 構造化された進捗報告
 ```bash
-# 定期的な進捗記録
-echo "[$(date)] タスク: [タスク名] - 状態: [進行中/完了] - 進捗: [X%]" >> ./tmp/worker${WORKER_NUM}_progress.log
+# BOSSが作成したプロジェクトフォルダを使用
+PROJECT_DIR="./projects/[プロジェクト名]"
+
+# 定期的な進捗記録（プロジェクトフォルダ内に記録）
+echo "[$(date)] タスク: [タスク名] - 状態: [進行中/完了] - 進捗: [X%]" >> "${PROJECT_DIR}/progress/worker${WORKER_NUM}_progress.log"
 
 # 課題発生時の報告
 if [ $? -ne 0 ]; then
@@ -114,15 +117,24 @@ fi
 ## 完了管理と報告システム
 ### 1. 個人タスク完了処理
 ```bash
-# 自分の完了ファイル作成（worker番号に応じて）
+# BOSSが作成したプロジェクトフォルダの進捗ディレクトリを使用
+PROJECT_DIR="./projects/[プロジェクト名]"
 WORKER_NUM=1  # worker1の場合（2,3は適宜変更）
-touch ./tmp/worker${WORKER_NUM}_done.txt
+
+# 自分の完了ファイル作成
+touch "${PROJECT_DIR}/progress/worker${WORKER_NUM}_done.txt"
 
 # 完了報告の準備
 COMPLETION_REPORT="【Worker${WORKER_NUM} 完了報告】
 
 ## 実施したタスク
-$(cat ./tmp/worker${WORKER_NUM}_progress.log | grep "完了")
+$(cat "${PROJECT_DIR}/progress/worker${WORKER_NUM}_progress.log" | grep "完了")
+
+## 作成した成果物
+- ソースコード: ${PROJECT_DIR}/src/ 配下のファイル
+- ドキュメント: ${PROJECT_DIR}/docs/ 配下のファイル
+- リソース: ${PROJECT_DIR}/assets/ 配下のファイル
+- 最終成果物: ${PROJECT_DIR}/output/ 配下のファイル
 
 ## 創出した価値
 1. [具体的な成果1]
@@ -142,21 +154,25 @@ $(cat ./tmp/worker${WORKER_NUM}_progress.log | grep "完了")
 
 ### 2. チーム完了確認と最終報告
 ```bash
-# 全員の完了確認
-if [ -f ./tmp/worker1_done.txt ] && [ -f ./tmp/worker2_done.txt ] && [ -f ./tmp/worker3_done.txt ]; then
+# 全員の完了確認（BOSSが設定した進捗フォルダを参照）
+if [ -f "${PROJECT_DIR}/progress/worker1_done.txt" ] && [ -f "${PROJECT_DIR}/progress/worker2_done.txt" ] && [ -f "${PROJECT_DIR}/progress/worker3_done.txt" ]; then
     echo "全員の作業完了を確認"
     
     # 最後の完了者として統合報告
     ./agent-send.sh boss1 "【プロジェクト完了報告】全Worker作業完了
 
+## プロジェクト成果物
+- プロジェクトフォルダ: ${PROJECT_DIR}
+- 成果物一覧: $(find "${PROJECT_DIR}" -type f -not -path "*/progress/*" | head -10)
+
 ## Worker1の成果
-$(cat ./tmp/worker1_progress.log | tail -20)
+$(cat "${PROJECT_DIR}/progress/worker1_progress.log" | tail -10)
 
 ## Worker2の成果
-$(cat ./tmp/worker2_progress.log | tail -20)
+$(cat "${PROJECT_DIR}/progress/worker2_progress.log" | tail -10)
 
 ## Worker3の成果
-$(cat ./tmp/worker3_progress.log | tail -20)
+$(cat "${PROJECT_DIR}/progress/worker3_progress.log" | tail -10)
 
 ## 統合的な成果
 - 全体として実現した価値

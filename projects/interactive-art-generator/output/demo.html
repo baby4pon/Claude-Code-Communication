@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Interactive Art Generator - デモページ</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', sans-serif;
+            background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
+            color: white;
+            margin: 0;
+            padding: 20px;
+        }
+        .demo-container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        .demo-header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        .demo-header h1 {
+            font-size: 2.5rem;
+            background: linear-gradient(45deg, #fff, #ffd700);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 10px;
+        }
+        .feature-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+        .feature-card {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border-radius: 15px;
+            padding: 20px;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+        .feature-card h3 {
+            color: #ffd700;
+            margin-bottom: 10px;
+        }
+        .demo-link {
+            display: inline-block;
+            background: linear-gradient(45deg, #ff6b6b, #ff8e8e);
+            color: white;
+            text-decoration: none;
+            padding: 15px 30px;
+            border-radius: 25px;
+            font-weight: bold;
+            transition: transform 0.3s ease;
+            margin: 10px;
+        }
+        .demo-link:hover {
+            transform: translateY(-2px);
+        }
+        .specs-table {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 10px;
+            padding: 20px;
+            margin: 20px 0;
+        }
+        .specs-table table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        .specs-table th, .specs-table td {
+            padding: 10px;
+            text-align: left;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+        }
+        .specs-table th {
+            color: #ffd700;
+        }
+    </style>
+</head>
+<body>
+    <div class="demo-container">
+        <div class="demo-header">
+            <h1>Interactive Art Generator</h1>
+            <p>マウスを動かすだけで誰もが芸術家になれる革新的体験</p>
+            <a href="../src/index.html" class="demo-link">🎨 今すぐ体験する</a>
+        </div>
+
+        <div class="feature-grid">
+            <div class="feature-card">
+                <h3>🎭 感情色彩マッピング</h3>
+                <p>マウスの動きから感情を分析し、リアルタイムで色彩が変化。速く動かせば情熱的な赤、ゆっくり動かせば穏やかな青に。</p>
+                <ul>
+                    <li>4つの感情状態（興奮・喜び・穏やか・瞑想）</li>
+                    <li>速度・方向による自動色彩選択</li>
+                    <li>パーティクル効果による表現強化</li>
+                </ul>
+            </div>
+
+            <div class="feature-card">
+                <h3>⏰ レイヤー時空間描画</h3>
+                <p>時間軸を活用した4次元描画。過去の軌跡が美しく消失しながら、新しい軌跡と重層的に重なる幻想的なアート。</p>
+                <ul>
+                    <li>最大10レイヤーの重層表現</li>
+                    <li>時間による自動フェードアウト</li>
+                    <li>深度による視覚効果</li>
+                </ul>
+            </div>
+
+            <div class="feature-card">
+                <h3>🎵 音楽シンクロ描画</h3>
+                <p>環境音や音楽に反応して軌跡が変化。Web Audio APIによる高精度な音響分析で、音と視覚の完全な融合を実現。</p>
+                <ul>
+                    <li>リアルタイム音響分析</li>
+                    <li>音楽ジャンル自動認識</li>
+                    <li>ビート検出による特殊効果</li>
+                </ul>
+            </div>
+        </div>
+
+        <div class="specs-table">
+            <h3>🔧 技術仕様</h3>
+            <table>
+                <tr>
+                    <th>対応デバイス</th>
+                    <td>PC（Windows/Mac/Linux）、タブレット、スマートフォン</td>
+                </tr>
+                <tr>
+                    <th>対応ブラウザ</th>
+                    <td>Chrome 60+、Firefox 55+、Safari 12+、Edge 79+</td>
+                </tr>
+                <tr>
+                    <th>レスポンス時間</th>
+                    <td>1秒以内（成功基準クリア）</td>
+                </tr>
+                <tr>
+                    <th>フレームレート</th>
+                    <td>60fps（パフォーマンスモード時30fps）</td>
+                </tr>
+                <tr>
+                    <th>音声入力</th>
+                    <td>マイクロフォン（許可制）</td>
+                </tr>
+                <tr>
+                    <th>保存形式</th>
+                    <td>PNG画像</td>
+                </tr>
+            </table>
+        </div>
+
+        <div class="feature-card">
+            <h3>🎯 使用方法</h3>
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px;">
+                <div>
+                    <h4>基本操作</h4>
+                    <ul>
+                        <li>描画: マウスドラッグ/タッチ</li>
+                        <li>クリア: Ctrl+C</li>
+                        <li>保存: Ctrl+S</li>
+                    </ul>
+                </div>
+                <div>
+                    <h4>モード切替</h4>
+                    <ul>
+                        <li>1キー: 感情色彩</li>
+                        <li>2キー: レイヤー時空</li>
+                        <li>3キー: 音楽シンクロ</li>
+                    </ul>
+                </div>
+                <div>
+                    <h4>アクセシビリティ</h4>
+                    <ul>
+                        <li>キーボードナビゲーション</li>
+                        <li>スクリーンリーダー対応</li>
+                        <li>高コントラスト表示</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <div class="demo-header" style="margin-top: 40px;">
+            <h3>🚀 今すぐ体験してみよう！</h3>
+            <p>革新的なUI/UXで、あなたの創造性を解き放ちましょう</p>
+            <a href="../src/index.html" class="demo-link">🎨 Interactive Art Generator を開く</a>
+        </div>
+    </div>
+</body>
+</html>

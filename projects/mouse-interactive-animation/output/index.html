@@ -1,0 +1,418 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Synaptic Flow - Revolutionary Interactive Experience</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background: radial-gradient(circle at center, #1a1a2e 0%, #0a0a1a 100%);
+            min-height: 100vh;
+            overflow: hidden;
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            position: relative;
+            cursor: none;
+        }
+
+        .main-container {
+            width: 100vw;
+            height: 100vh;
+            position: relative;
+        }
+
+        #interactiveCanvas {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 1;
+        }
+
+        .title-overlay {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            text-align: center;
+            color: white;
+            z-index: 10;
+            pointer-events: none;
+        }
+
+        .title-overlay h1 {
+            font-size: 4rem;
+            font-weight: 700;
+            margin-bottom: 1rem;
+            text-shadow: 0 0 30px rgba(75, 179, 217, 0.6);
+            background: linear-gradient(45deg, #4FB3D9, #FF6B6B, #A8E6CF);
+            background-size: 200% 200%;
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            animation: gradientShift 3s ease-in-out infinite;
+        }
+
+        @keyframes gradientShift {
+            0%, 100% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+        }
+
+        .title-overlay p {
+            font-size: 1.2rem;
+            opacity: 0.8;
+            text-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
+        }
+
+        .loading-screen {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: #1a1a1a;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            z-index: 9999;
+            transition: opacity 0.5s ease;
+        }
+
+        .loading-screen.hidden {
+            opacity: 0;
+            pointer-events: none;
+        }
+
+        .spinner {
+            width: 60px;
+            height: 60px;
+            border: 3px solid rgba(255, 255, 255, 0.1);
+            border-top: 3px solid #4facfe;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin-bottom: 20px;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .loading-text {
+            color: white;
+            font-size: 1.2rem;
+            margin-bottom: 10px;
+        }
+
+        .loading-progress {
+            color: #4facfe;
+            font-size: 0.9rem;
+        }
+
+        /* エラー表示 */
+        .error-display {
+            position: fixed;
+            top: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(255, 0, 0, 0.9);
+            color: white;
+            padding: 15px 25px;
+            border-radius: 5px;
+            font-size: 14px;
+            z-index: 10000;
+            display: none;
+        }
+
+        /* レスポンシブ対応 */
+        @media (max-width: 768px) {
+            .title-overlay h1 {
+                font-size: 2rem;
+            }
+            
+            .title-overlay p {
+                font-size: 1rem;
+            }
+        }
+
+        /* モバイル対応の注意書き */
+        .mobile-notice {
+            position: fixed;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(0, 0, 0, 0.8);
+            color: white;
+            padding: 10px 15px;
+            border-radius: 20px;
+            font-size: 12px;
+            z-index: 1000;
+            display: none;
+        }
+
+        @media (max-width: 768px) {
+            .mobile-notice {
+                display: block;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="loading-screen" id="loadingScreen">
+        <div class="spinner"></div>
+        <div class="loading-text">革新的アニメーションシステム読み込み中...</div>
+        <div class="loading-progress" id="loadingProgress">Neural Motion Predictor 初期化中</div>
+    </div>
+
+    <div class="error-display" id="errorDisplay"></div>
+
+    <div class="main-container" id="mainContainer">
+        <canvas id="interactiveCanvas"></canvas>
+        <div class="title-overlay">
+            <h1>Synaptic Flow</h1>
+            <p>神経網が織りなす革新的インタラクティブ体験</p>
+        </div>
+    </div>
+
+    <div class="mobile-notice">
+        モバイルデバイスでは一部機能が制限される場合があります
+    </div>
+
+    <script type="module">
+        // モジュールローダー
+        class ModuleLoader {
+            constructor() {
+                this.loadingSteps = [
+                    'Neural Motion Predictor 初期化中',
+                    'Quantum Particle System 準備中',
+                    'Adaptive Performance System 構築中',
+                    'Magnetism UI Transformer 設定中',
+                    'Demo Application 起動中'
+                ];
+                this.currentStep = 0;
+            }
+
+            async loadModules() {
+                try {
+                    for (let i = 0; i < this.loadingSteps.length; i++) {
+                        this.updateProgress(this.loadingSteps[i]);
+                        await this.simulateLoading(300 + Math.random() * 500);
+                        this.currentStep++;
+                    }
+
+                    // 視覚エフェクトシステムの読み込み
+                    await this.loadScript('./visual-effects-system.js');
+                    await this.loadScript('./temporal-echo-effect.js');
+
+                    return this.initializeSynapticFlow;
+                } catch (error) {
+                    this.showError('モジュールの読み込みに失敗しました: ' + error.message);
+                    throw error;
+                }
+            }
+
+            updateProgress(text) {
+                const progressElement = document.getElementById('loadingProgress');
+                if (progressElement) {
+                    progressElement.textContent = text;
+                }
+            }
+
+            simulateLoading(duration) {
+                return new Promise(resolve => setTimeout(resolve, duration));
+            }
+
+            showError(message) {
+                const errorDisplay = document.getElementById('errorDisplay');
+                if (errorDisplay) {
+                    errorDisplay.textContent = message;
+                    errorDisplay.style.display = 'block';
+                    setTimeout(() => {
+                        errorDisplay.style.display = 'none';
+                    }, 5000);
+                }
+            }
+
+            async loadScript(src) {
+                return new Promise((resolve, reject) => {
+                    const script = document.createElement('script');
+                    script.src = src;
+                    script.onload = resolve;
+                    script.onerror = reject;
+                    document.head.appendChild(script);
+                });
+            }
+
+            initializeSynapticFlow(containerSelector) {
+                const canvas = document.getElementById('interactiveCanvas');
+                if (!canvas) throw new Error('Canvas not found');
+
+                // Synaptic Flow システムの初期化
+                const visualEffects = new window.VisualEffectsSystem.VisualEffectsManager(canvas);
+                const ctx = canvas.getContext('2d');
+                const temporalEcho = new window.TemporalEchoEffect(canvas, ctx);
+
+                return {
+                    visualEffects,
+                    temporalEcho,
+                    destroy: () => {
+                        // クリーンアップ処理
+                    }
+                };
+            }
+
+            hideLoading() {
+                const loadingScreen = document.getElementById('loadingScreen');
+                if (loadingScreen) {
+                    loadingScreen.classList.add('hidden');
+                    setTimeout(() => {
+                        loadingScreen.remove();
+                    }, 500);
+                }
+            }
+        }
+
+        // アプリケーション初期化
+        class AppInitializer {
+            constructor() {
+                this.loader = new ModuleLoader();
+                this.demo = null;
+            }
+
+            async initialize() {
+                try {
+                    // ブラウザ互換性チェック
+                    this.checkBrowserCompatibility();
+
+                    // モジュール読み込み
+                    const initializeDemo = await this.loader.loadModules();
+
+                    // ローディング画面を隠す
+                    this.loader.hideLoading();
+
+                    // Synaptic Flow初期化
+                    this.demo = initializeDemo('#mainContainer');
+                    
+                    // タイトルオーバーレイを自動的に隠す
+                    setTimeout(() => {
+                        const titleOverlay = document.querySelector('.title-overlay');
+                        if (titleOverlay) {
+                            titleOverlay.style.transition = 'opacity 2s ease';
+                            titleOverlay.style.opacity = '0';
+                        }
+                    }, 3000);
+
+                    // 初期化完了ログ
+                    console.log('Interactive Animation Demo initialized successfully');
+
+                    // パフォーマンス情報をコンソールに出力
+                    this.logPerformanceInfo();
+
+                } catch (error) {
+                    console.error('Initialization failed:', error);
+                    this.loader.showError('アプリケーションの初期化に失敗しました');
+                }
+            }
+
+            checkBrowserCompatibility() {
+                const requiredFeatures = [
+                    'requestAnimationFrame',
+                    'PerformanceObserver',
+                    'Map',
+                    'Set',
+                    'Promise'
+                ];
+
+                const missingFeatures = requiredFeatures.filter(feature => {
+                    return !(feature in window) && !(feature in window.performance);
+                });
+
+                if (missingFeatures.length > 0) {
+                    console.warn('Missing browser features:', missingFeatures);
+                    this.loader.showError('お使いのブラウザは一部機能に対応していません');
+                }
+
+                // WebGL対応チェック
+                const canvas = document.createElement('canvas');
+                const gl = canvas.getContext('webgl') || canvas.getContext('experimental-webgl');
+                if (!gl) {
+                    console.warn('WebGL not supported');
+                    this.loader.showError('WebGLに対応していないため、一部エフェクトが制限されます');
+                }
+            }
+
+            logPerformanceInfo() {
+                if (this.demo && this.demo.performanceSystem) {
+                    const info = this.demo.performanceSystem.getPerformanceInfo();
+                    console.group('Performance Information');
+                    console.log('Device Score:', info.deviceScore);
+                    console.log('GPU Info:', info.gpuInfo);
+                    console.log('Initial Quality:', info.quality);
+                    console.groupEnd();
+                }
+            }
+
+            destroy() {
+                if (this.demo) {
+                    this.demo.destroy();
+                }
+            }
+        }
+
+        // エラーハンドリング
+        window.addEventListener('error', (event) => {
+            console.error('Global error:', event.error);
+            const errorDisplay = document.getElementById('errorDisplay');
+            if (errorDisplay) {
+                errorDisplay.textContent = 'エラーが発生しました: ' + event.error.message;
+                errorDisplay.style.display = 'block';
+            }
+        });
+
+        // ページ離脱時のクリーンアップ
+        window.addEventListener('beforeunload', () => {
+            if (window.appInitializer) {
+                window.appInitializer.destroy();
+            }
+        });
+
+        // アプリケーション開始
+        document.addEventListener('DOMContentLoaded', async () => {
+            window.appInitializer = new AppInitializer();
+            await window.appInitializer.initialize();
+        });
+
+        // パフォーマンス監視
+        if ('PerformanceObserver' in window) {
+            const observer = new PerformanceObserver((list) => {
+                const entries = list.getEntries();
+                entries.forEach(entry => {
+                    if (entry.entryType === 'navigation') {
+                        console.log('Page load time:', entry.loadEventEnd - entry.fetchStart, 'ms');
+                    }
+                });
+            });
+            observer.observe({ entryTypes: ['navigation'] });
+        }
+
+        // フルスクリーン切り替え（F11キー）
+        document.addEventListener('keydown', (event) => {
+            if (event.key === 'F11') {
+                event.preventDefault();
+                if (!document.fullscreenElement) {
+                    document.documentElement.requestFullscreen();
+                } else {
+                    document.exitFullscreen();
+                }
+            }
+        });
+    </script>
+</body>
+</html>

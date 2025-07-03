@@ -1,0 +1,754 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Quantum Mouse Interactive Animation</title>
+    <style>
+        /* Embedded CSS for standalone demo */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'SF Pro Display', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #0f0f23 0%, #1a1a3e 50%, #0f0f23 100%);
+            color: #ffffff;
+            overflow: hidden;
+            cursor: none;
+        }
+
+        #app {
+            position: relative;
+            width: 100vw;
+            height: 100vh;
+            overflow: hidden;
+        }
+
+        #quantum-canvas {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            z-index: 1;
+            pointer-events: none;
+            background: transparent;
+        }
+
+        .control-panel {
+            position: fixed;
+            top: 20px;
+            left: 20px;
+            z-index: 10;
+            background: rgba(15, 15, 35, 0.9);
+            backdrop-filter: blur(10px);
+            border-radius: 16px;
+            padding: 20px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+            min-width: 280px;
+        }
+
+        .mode-selector {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 8px;
+            margin-bottom: 20px;
+        }
+
+        .mode-selector button {
+            padding: 10px 12px;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 8px;
+            background: rgba(255, 255, 255, 0.05);
+            color: #cbd5e1;
+            font-size: 12px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            backdrop-filter: blur(10px);
+        }
+
+        .mode-selector button:hover {
+            background: rgba(255, 255, 255, 0.1);
+            border-color: rgba(255, 255, 255, 0.3);
+            transform: translateY(-1px);
+        }
+
+        .mode-selector button.active {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border-color: #667eea;
+            color: white;
+            box-shadow: 0 4px 16px rgba(102, 126, 234, 0.3);
+        }
+
+        .intensity-control {
+            margin-bottom: 20px;
+        }
+
+        .intensity-control label {
+            display: block;
+            margin-bottom: 8px;
+            font-size: 14px;
+            font-weight: 500;
+            color: #e2e8f0;
+        }
+
+        .intensity-control input[type="range"] {
+            width: 100%;
+            height: 6px;
+            border-radius: 3px;
+            background: rgba(255, 255, 255, 0.1);
+            outline: none;
+            appearance: none;
+        }
+
+        .intensity-control input[type="range"]::-webkit-slider-thumb {
+            appearance: none;
+            width: 18px;
+            height: 18px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            cursor: pointer;
+            box-shadow: 0 2px 8px rgba(102, 126, 234, 0.4);
+        }
+
+        .info-panel {
+            position: fixed;
+            bottom: 20px;
+            left: 20px;
+            z-index: 10;
+            background: rgba(15, 15, 35, 0.9);
+            backdrop-filter: blur(10px);
+            border-radius: 16px;
+            padding: 16px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+            min-width: 280px;
+        }
+
+        .info-panel h3 {
+            margin-bottom: 12px;
+            font-size: 16px;
+            font-weight: 600;
+            color: #e2e8f0;
+        }
+
+        .info-panel p {
+            margin-bottom: 6px;
+            font-size: 13px;
+            color: #94a3b8;
+            font-family: 'SF Mono', Monaco, monospace;
+        }
+
+        .performance-panel {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: 10;
+            background: rgba(15, 15, 35, 0.9);
+            backdrop-filter: blur(10px);
+            border-radius: 16px;
+            padding: 16px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+            min-width: 200px;
+        }
+
+        .performance-panel h4 {
+            margin-bottom: 12px;
+            font-size: 14px;
+            font-weight: 600;
+            color: #e2e8f0;
+        }
+
+        .metric {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 8px;
+            font-size: 12px;
+        }
+
+        .metric-label {
+            color: #94a3b8;
+        }
+
+        .metric-value {
+            color: #e2e8f0;
+            font-family: 'SF Mono', Monaco, monospace;
+        }
+
+        @media (max-width: 768px) {
+            .control-panel,
+            .info-panel,
+            .performance-panel {
+                position: relative;
+                margin: 10px;
+                min-width: auto;
+                width: calc(100% - 20px);
+            }
+            
+            .performance-panel {
+                top: auto;
+                right: auto;
+            }
+            
+            .mode-selector {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div id="app">
+        <!-- Control Panel -->
+        <div class="control-panel">
+            <div class="mode-selector">
+                <button id="quantum-btn" class="active">🌌 Quantum</button>
+                <button id="temporal-btn">⏰ Temporal</button>
+                <button id="emotion-btn">💭 Emotion</button>
+                <button id="distortion-btn">🌀 Distortion</button>
+            </div>
+
+            <div class="intensity-control">
+                <label>Intensity: <span id="intensity-value">0.80</span></label>
+                <input type="range" id="intensity-slider" min="0" max="1" step="0.01" value="0.8">
+            </div>
+        </div>
+
+        <!-- Main Canvas -->
+        <canvas id="quantum-canvas"></canvas>
+
+        <!-- Info Panel -->
+        <div class="info-panel">
+            <h3>Quantum Mouse Animation</h3>
+            <p>Mode: <strong id="current-mode">QUANTUM</strong></p>
+            <p>Position: (<span id="mouse-x">0</span>, <span id="mouse-y">0</span>)</p>
+            <p>Resonance: <span id="resonance-level">0.000</span></p>
+            <p>Quantum States: <span id="quantum-count">0</span></p>
+        </div>
+
+        <!-- Performance Panel -->
+        <div class="performance-panel">
+            <h4>Performance</h4>
+            <div class="metric">
+                <span class="metric-label">FPS:</span>
+                <span class="metric-value" id="fps-counter">60</span>
+            </div>
+            <div class="metric">
+                <span class="metric-label">Particles:</span>
+                <span class="metric-value" id="particle-count">500</span>
+            </div>
+            <div class="metric">
+                <span class="metric-label">Render:</span>
+                <span class="metric-value" id="render-time">16ms</span>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Quantum Mouse Interactive Animation - Standalone Implementation
+        class QuantumMouseAnimation {
+            constructor() {
+                this.canvas = document.getElementById('quantum-canvas');
+                this.ctx = this.canvas.getContext('2d');
+                this.mode = 'quantum';
+                this.intensity = 0.8;
+                
+                this.mouse = { x: 0, y: 0 };
+                this.velocity = { x: 0, y: 0 };
+                this.previousMouse = { x: 0, y: 0 };
+                this.quantumStates = [];
+                this.particles = [];
+                this.resonanceLevel = 0;
+                this.trailPoints = [];
+                
+                this.frameCount = 0;
+                this.lastTime = performance.now();
+                this.fps = 60;
+                this.renderTime = 16;
+                
+                this.init();
+            }
+            
+            init() {
+                this.setupCanvas();
+                this.setupEventListeners();
+                this.createParticles();
+                this.animate();
+            }
+            
+            setupCanvas() {
+                const resize = () => {
+                    this.canvas.width = window.innerWidth;
+                    this.canvas.height = window.innerHeight;
+                };
+                resize();
+                window.addEventListener('resize', resize);
+            }
+            
+            setupEventListeners() {
+                // Mouse tracking with RAF throttling
+                let animationFrameId;
+                document.addEventListener('mousemove', (e) => {
+                    if (!animationFrameId) {
+                        animationFrameId = requestAnimationFrame(() => {
+                            this.updateMouse(e.clientX, e.clientY);
+                            animationFrameId = null;
+                        });
+                    }
+                });
+                
+                // Touch support
+                document.addEventListener('touchmove', (e) => {
+                    e.preventDefault();
+                    const touch = e.touches[0];
+                    if (touch && !animationFrameId) {
+                        animationFrameId = requestAnimationFrame(() => {
+                            this.updateMouse(touch.clientX, touch.clientY);
+                            animationFrameId = null;
+                        });
+                    }
+                }, { passive: false });
+                
+                // Mode buttons
+                document.getElementById('quantum-btn').addEventListener('click', () => this.setMode('quantum'));
+                document.getElementById('temporal-btn').addEventListener('click', () => this.setMode('temporal'));
+                document.getElementById('emotion-btn').addEventListener('click', () => this.setMode('emotion'));
+                document.getElementById('distortion-btn').addEventListener('click', () => this.setMode('distortion'));
+                
+                // Intensity slider
+                const slider = document.getElementById('intensity-slider');
+                slider.addEventListener('input', (e) => {
+                    this.intensity = parseFloat(e.target.value);
+                    document.getElementById('intensity-value').textContent = this.intensity.toFixed(2);
+                });
+
+                // Initialize mouse at center
+                this.updateMouse(window.innerWidth / 2, window.innerHeight / 2);
+            }
+            
+            setMode(mode) {
+                this.mode = mode;
+                document.querySelectorAll('.mode-selector button').forEach(btn => btn.classList.remove('active'));
+                document.getElementById(mode + '-btn').classList.add('active');
+                document.getElementById('current-mode').textContent = mode.toUpperCase();
+            }
+            
+            updateMouse(x, y) {
+                this.previousMouse.x = this.mouse.x;
+                this.previousMouse.y = this.mouse.y;
+                this.mouse.x = x;
+                this.mouse.y = y;
+                
+                // Calculate velocity
+                this.velocity.x = this.mouse.x - this.previousMouse.x;
+                this.velocity.y = this.mouse.y - this.previousMouse.y;
+                
+                // Update trail
+                this.trailPoints.push({ x, y, life: 1.0 });
+                if (this.trailPoints.length > 20) {
+                    this.trailPoints.shift();
+                }
+                
+                // Update quantum states
+                this.updateQuantumStates();
+                
+                // Update UI
+                document.getElementById('mouse-x').textContent = Math.round(x);
+                document.getElementById('mouse-y').textContent = Math.round(y);
+            }
+            
+            updateQuantumStates() {
+                const speed = Math.sqrt(this.velocity.x * this.velocity.x + this.velocity.y * this.velocity.y);
+                
+                // Create new quantum state based on mouse motion
+                if (speed > 2) {
+                    const newState = {
+                        x: this.mouse.x,
+                        y: this.mouse.y,
+                        probability: Math.min(speed / 20, 1.0),
+                        phase: Math.atan2(this.velocity.y, this.velocity.x),
+                        life: 1.0,
+                        waveFunction: this.generateWaveFunction(speed),
+                        resonanceRadius: 50 + speed * 2
+                    };
+                    
+                    this.quantumStates.push(newState);
+                }
+                
+                // Update existing states with quantum decay
+                this.quantumStates = this.quantumStates.map(state => ({
+                    ...state,
+                    life: state.life * 0.985,
+                    phase: state.phase + 0.05,
+                    probability: state.probability * 0.99
+                })).filter(state => state.life > 0.02);
+                
+                // Limit state count for performance
+                if (this.quantumStates.length > 12) {
+                    this.quantumStates.shift();
+                }
+                
+                // Calculate quantum resonance
+                this.calculateResonance();
+                
+                // Update UI
+                document.getElementById('quantum-count').textContent = this.quantumStates.length;
+                document.getElementById('resonance-level').textContent = this.resonanceLevel.toFixed(3);
+            }
+            
+            generateWaveFunction(speed) {
+                const waveLength = 24;
+                const wave = [];
+                for (let i = 0; i < waveLength; i++) {
+                    const phase = (i / waveLength) * 2 * Math.PI;
+                    const amplitude = Math.exp(-Math.pow(i - waveLength/2, 2) / (2 * Math.pow(waveLength/6, 2)));
+                    const frequency = 1 + speed * 0.01;
+                    wave.push(amplitude * Math.sin(phase * frequency + this.velocity.x * 0.005));
+                }
+                return wave;
+            }
+            
+            calculateResonance() {
+                let totalResonance = 0;
+                const states = this.quantumStates;
+                
+                for (let i = 0; i < states.length; i++) {
+                    for (let j = i + 1; j < states.length; j++) {
+                        const state1 = states[i];
+                        const state2 = states[j];
+                        
+                        const distance = Math.sqrt(
+                            Math.pow(state1.x - state2.x, 2) + 
+                            Math.pow(state1.y - state2.y, 2)
+                        );
+                        
+                        // Quantum entanglement effect
+                        const entanglement = state1.probability * state2.probability;
+                        const phaseAlignment = Math.cos(state1.phase - state2.phase);
+                        const spatialResonance = Math.exp(-distance / 80);
+                        
+                        const resonance = entanglement * phaseAlignment * spatialResonance;
+                        totalResonance += Math.abs(resonance);
+                    }
+                }
+                
+                this.resonanceLevel = Math.min(totalResonance, 1.0);
+            }
+            
+            createParticles() {
+                const particleCount = 800;
+                this.particles = Array.from({ length: particleCount }, () => ({
+                    x: Math.random() * this.canvas.width,
+                    y: Math.random() * this.canvas.height,
+                    vx: (Math.random() - 0.5) * 1,
+                    vy: (Math.random() - 0.5) * 1,
+                    life: Math.random() * 150 + 50,
+                    maxLife: 200,
+                    size: Math.random() * 2 + 0.5,
+                    hue: Math.random() * 360,
+                    baseHue: Math.random() * 360,
+                    energy: Math.random()
+                }));
+                
+                document.getElementById('particle-count').textContent = particleCount;
+            }
+            
+            updateParticles() {
+                this.particles.forEach(particle => {
+                    // Apply quantum field influence
+                    this.quantumStates.forEach(state => {
+                        const dx = particle.x - state.x;
+                        const dy = particle.y - state.y;
+                        const distance = Math.sqrt(dx * dx + dy * dy);
+                        
+                        if (distance < state.resonanceRadius) {
+                            const influence = (state.probability * this.intensity) / (distance * 0.01 + 1);
+                            const quantumAngle = state.phase + Math.atan2(dy, dx) + Math.sin(performance.now() * 0.001) * 0.5;
+                            
+                            particle.vx += Math.cos(quantumAngle) * influence * 0.05;
+                            particle.vy += Math.sin(quantumAngle) * influence * 0.05;
+                            
+                            // Color influence based on quantum state
+                            particle.hue = (particle.baseHue + state.phase * 57.2958) % 360;
+                            particle.energy = Math.min(particle.energy + influence * 0.1, 1.0);
+                        }
+                    });
+                    
+                    // Apply mouse attraction with quantum tunneling effect
+                    const mouseDx = this.mouse.x - particle.x;
+                    const mouseDy = this.mouse.y - particle.y;
+                    const mouseDistance = Math.sqrt(mouseDx * mouseDx + mouseDy * mouseDy);
+                    
+                    if (mouseDistance < 200) {
+                        const mouseForce = (this.intensity * 0.3) / (mouseDistance * 0.1 + 1);
+                        const quantumTunnel = Math.sin(performance.now() * 0.01 + particle.x * 0.01) * 0.2;
+                        
+                        particle.vx += (mouseDx / mouseDistance) * (mouseForce + quantumTunnel);
+                        particle.vy += (mouseDy / mouseDistance) * (mouseForce + quantumTunnel);
+                    }
+                    
+                    // Update position with quantum uncertainty
+                    const uncertainty = (Math.random() - 0.5) * this.resonanceLevel * 0.5;
+                    particle.x += particle.vx + uncertainty;
+                    particle.y += particle.vy + uncertainty;
+                    
+                    // Apply quantum friction
+                    particle.vx *= 0.995;
+                    particle.vy *= 0.995;
+                    
+                    // Energy decay
+                    particle.energy *= 0.995;
+                    
+                    // Update life and respawn
+                    particle.life -= 0.3;
+                    if (particle.life <= 0) {
+                        particle.x = Math.random() * this.canvas.width;
+                        particle.y = Math.random() * this.canvas.height;
+                        particle.life = particle.maxLife;
+                        particle.baseHue = Math.random() * 360;
+                        particle.energy = Math.random() * 0.5;
+                    }
+                    
+                    // Boundary conditions with wrapping
+                    if (particle.x < 0) particle.x = this.canvas.width;
+                    if (particle.x > this.canvas.width) particle.x = 0;
+                    if (particle.y < 0) particle.y = this.canvas.height;
+                    if (particle.y > this.canvas.height) particle.y = 0;
+                });
+            }
+            
+            render() {
+                const renderStart = performance.now();
+                
+                // Clear with quantum fade effect
+                this.ctx.fillStyle = 'rgba(0, 0, 0, 0.03)';
+                this.ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
+                
+                // Render quantum fields
+                this.renderQuantumStates();
+                
+                // Render particles
+                this.renderParticles();
+                
+                // Render mouse trail
+                this.renderTrail();
+                
+                // Mode-specific effects
+                this.renderModeEffects();
+                
+                // Calculate render time
+                this.renderTime = performance.now() - renderStart;
+                document.getElementById('render-time').textContent = this.renderTime.toFixed(1) + 'ms';
+            }
+            
+            renderQuantumStates() {
+                this.quantumStates.forEach((state, index) => {
+                    const alpha = state.probability * this.intensity * state.life;
+                    
+                    // Quantum field visualization
+                    this.ctx.save();
+                    this.ctx.globalAlpha = alpha * 0.2;
+                    
+                    const gradient = this.ctx.createRadialGradient(
+                        state.x, state.y, 0,
+                        state.x, state.y, state.resonanceRadius
+                    );
+                    
+                    const hue = (state.phase * 180 / Math.PI + 180) % 360;
+                    gradient.addColorStop(0, `hsla(${hue}, 80%, 60%, ${alpha * 0.8})`);
+                    gradient.addColorStop(0.5, `hsla(${hue + 30}, 70%, 50%, ${alpha * 0.4})`);
+                    gradient.addColorStop(1, `hsla(${hue + 60}, 60%, 40%, 0)`);
+                    
+                    this.ctx.fillStyle = gradient;
+                    this.ctx.fillRect(
+                        state.x - state.resonanceRadius, 
+                        state.y - state.resonanceRadius,
+                        state.resonanceRadius * 2, 
+                        state.resonanceRadius * 2
+                    );
+                    this.ctx.restore();
+                    
+                    // Quantum core with pulsing effect
+                    this.ctx.save();
+                    this.ctx.globalAlpha = alpha;
+                    const pulse = 1 + Math.sin(performance.now() * 0.005 + index) * 0.3;
+                    this.ctx.fillStyle = `hsl(${hue}, 90%, 70%)`;
+                    this.ctx.beginPath();
+                    this.ctx.arc(state.x, state.y, state.probability * 8 * pulse, 0, Math.PI * 2);
+                    this.ctx.fill();
+                    this.ctx.restore();
+                    
+                    // Wave function visualization
+                    if (state.waveFunction) {
+                        this.ctx.save();
+                        this.ctx.globalAlpha = alpha * 0.7;
+                        this.ctx.strokeStyle = `hsl(${hue + 120}, 70%, 50%)`;
+                        this.ctx.lineWidth = 1.5;
+                        this.ctx.beginPath();
+                        
+                        for (let i = 0; i < state.waveFunction.length; i++) {
+                            const angle = (i / state.waveFunction.length) * Math.PI * 2;
+                            const radius = 25 + state.waveFunction[i] * 15;
+                            const x = state.x + Math.cos(angle + state.phase) * radius;
+                            const y = state.y + Math.sin(angle + state.phase) * radius;
+                            
+                            if (i === 0) {
+                                this.ctx.moveTo(x, y);
+                            } else {
+                                this.ctx.lineTo(x, y);
+                            }
+                        }
+                        
+                        this.ctx.closePath();
+                        this.ctx.stroke();
+                        this.ctx.restore();
+                    }
+                });
+            }
+            
+            renderParticles() {
+                this.particles.forEach(particle => {
+                    const alpha = (particle.life / particle.maxLife) * particle.energy;
+                    
+                    this.ctx.save();
+                    this.ctx.globalAlpha = alpha * this.intensity;
+                    
+                    // Quantum-influenced color
+                    const brightness = 40 + particle.energy * 40;
+                    this.ctx.fillStyle = `hsl(${particle.hue}, 80%, ${brightness}%)`;
+                    
+                    // Size based on energy and quantum resonance
+                    const size = particle.size * (1 + particle.energy * 0.5 + this.resonanceLevel * 0.3);
+                    
+                    this.ctx.beginPath();
+                    this.ctx.arc(particle.x, particle.y, size, 0, Math.PI * 2);
+                    this.ctx.fill();
+                    
+                    // Energy glow effect
+                    if (particle.energy > 0.7) {
+                        this.ctx.globalAlpha = alpha * 0.5;
+                        this.ctx.fillStyle = `hsl(${particle.hue}, 100%, 80%)`;
+                        this.ctx.beginPath();
+                        this.ctx.arc(particle.x, particle.y, size * 2, 0, Math.PI * 2);
+                        this.ctx.fill();
+                    }
+                    
+                    this.ctx.restore();
+                });
+            }
+            
+            renderTrail() {
+                if (this.trailPoints.length < 2) return;
+                
+                this.ctx.save();
+                this.ctx.strokeStyle = `hsla(${this.resonanceLevel * 360}, 90%, 70%, 0.8)`;
+                this.ctx.lineWidth = 4;
+                this.ctx.lineCap = 'round';
+                this.ctx.lineJoin = 'round';
+                
+                this.ctx.beginPath();
+                this.trailPoints.forEach((point, index) => {
+                    const alpha = (index / this.trailPoints.length) * point.life;
+                    this.ctx.globalAlpha = alpha * this.intensity;
+                    
+                    if (index === 0) {
+                        this.ctx.moveTo(point.x, point.y);
+                    } else {
+                        this.ctx.lineTo(point.x, point.y);
+                    }
+                    
+                    // Decay trail points
+                    point.life *= 0.95;
+                });
+                
+                this.ctx.stroke();
+                this.ctx.restore();
+                
+                // Remove faded trail points
+                this.trailPoints = this.trailPoints.filter(point => point.life > 0.1);
+            }
+            
+            renderModeEffects() {
+                switch (this.mode) {
+                    case 'temporal':
+                        // Temporal distortion with time ripples
+                        this.ctx.save();
+                        this.ctx.globalAlpha = this.resonanceLevel * 0.2;
+                        this.ctx.fillStyle = 'rgba(100, 200, 255, 0.1)';
+                        
+                        for (let i = 0; i < 3; i++) {
+                            const ripple = Math.sin(performance.now() * 0.002 + i * 2) * 50;
+                            this.ctx.fillRect(0, this.canvas.height/2 + ripple, this.canvas.width, 2);
+                        }
+                        this.ctx.restore();
+                        break;
+                        
+                    case 'emotion':
+                        // Emotion-based color shifts with breathing effect
+                        const emotionHue = (this.resonanceLevel * 360 + performance.now() * 0.1) % 360;
+                        const breathing = 1 + Math.sin(performance.now() * 0.003) * 0.1;
+                        
+                        this.ctx.save();
+                        this.ctx.globalCompositeOperation = 'multiply';
+                        this.ctx.fillStyle = `hsla(${emotionHue}, 60%, 50%, ${0.03 * breathing})`;
+                        this.ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
+                        this.ctx.restore();
+                        break;
+                        
+                    case 'distortion':
+                        // Reality distortion with wave effects
+                        this.ctx.save();
+                        const distortion = this.resonanceLevel * 3;
+                        this.ctx.filter = `blur(${distortion}px) contrast(${1 + distortion * 0.1})`;
+                        this.ctx.globalCompositeOperation = 'overlay';
+                        this.ctx.fillStyle = `rgba(255, 255, 255, ${0.01 + distortion * 0.005})`;
+                        this.ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
+                        this.ctx.restore();
+                        break;
+                }
+            }
+            
+            animate() {
+                const now = performance.now();
+                this.frameCount++;
+                
+                // Calculate FPS
+                if (now - this.lastTime >= 1000) {
+                    this.fps = this.frameCount;
+                    this.frameCount = 0;
+                    this.lastTime = now;
+                    document.getElementById('fps-counter').textContent = this.fps;
+                }
+                
+                this.updateParticles();
+                this.render();
+                
+                requestAnimationFrame(() => this.animate());
+            }
+        }
+        
+        // Initialize the animation when DOM is loaded
+        document.addEventListener('DOMContentLoaded', () => {
+            new QuantumMouseAnimation();
+        });
+        
+        // Performance monitoring
+        if ('PerformanceObserver' in window) {
+            const observer = new PerformanceObserver((list) => {
+                const entries = list.getEntries();
+                entries.forEach(entry => {
+                    if (entry.entryType === 'navigation') {
+                        console.log('Page load time:', entry.loadEventEnd - entry.fetchStart, 'ms');
+                    }
+                });
+            });
+            observer.observe({ entryTypes: ['navigation'] });
+        }
+    </script>
+</body>
+</html>

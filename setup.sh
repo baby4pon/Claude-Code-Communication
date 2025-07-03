@@ -37,6 +37,9 @@ log_info "📺 multiagentセッション作成開始 (4ペイン)..."
 # 最初のペイン作成
 tmux new-session -d -s multiagent -n "agents"
 
+# マウス操作有効化
+tmux set-option -t multiagent mouse on
+
 # 2x2グリッド作成（合計4ペイン）
 tmux split-window -h -t "multiagent:0"      # 水平分割（左右）
 tmux select-pane -t "multiagent:0.0"
@@ -75,6 +78,10 @@ log_info "👑 presidentセッション作成開始..."
 
 tmux new-session -d -s president
 tmux send-keys -t president "cd $(pwd)" C-m
+
+# マウス操作有効化
+tmux set-option -t president mouse on
+
 tmux send-keys -t president "export PS1='(\[\033[1;35m\]PRESIDENT\[\033[0m\]) \[\033[1;32m\]\w\[\033[0m\]\$ '" C-m
 tmux send-keys -t president "echo '=== PRESIDENT セッション ==='" C-m
 tmux send-keys -t president "echo 'プロジェクト統括責任者'" C-m
@@ -111,14 +118,21 @@ log_success "🎉 Demo環境セットアップ完了！"
 echo ""
 echo "📋 次のステップ:"
 echo "  1. 🔗 セッションアタッチ:"
-echo "     tmux attach-session -t multiagent   # マルチエージェント確認"
-echo "     tmux attach-session -t president    # プレジデント確認"
+echo "     # 各セッションは別々のターミナルで実行してください"
+echo "     tmux attach-session -t multiagent   # マルチエージェント確認（ターミナル1）"
+echo "     tmux attach-session -t president    # プレジデント確認（ターミナル2）"
+echo ""
+echo "  📱 マウス操作が有効化されています:"
+echo "     - ペインクリック: ペイン選択"
+echo "     - ペイン境界ドラッグ: サイズ変更"
+echo "     - 右クリック: コンテキストメニュー"
+echo "     - スクロール: 履歴表示"
 echo ""
 echo "  2. 🤖 Claude Code起動:"
 echo "     # 手順1: President認証"
-echo "     tmux send-keys -t president 'claude' C-m"
+echo "     tmux send-keys -t president 'claude --dangerously-skip-permissions' C-m"
 echo "     # 手順2: 認証後、multiagent一括起動"
-echo "     for i in {0..3}; do tmux send-keys -t multiagent:0.\$i 'claude' C-m; done"
+echo "     for i in {0..3}; do tmux send-keys -t multiagent:0.\$i 'claude --dangerously-skip-permissions' C-m"
 echo ""
 echo "  3. 📜 指示書確認:"
 echo "     PRESIDENT: instructions/president.md"
@@ -126,4 +140,12 @@ echo "     boss1: instructions/boss.md"
 echo "     worker1,2,3: instructions/worker.md"
 echo "     システム構造: CLAUDE.md"
 echo ""
-echo "  4. 🎯 デモ実行: PRESIDENTに「あなたはpresidentです。指示書に従って」と入力" 
+echo "  4. 🎯 デモ実行: PRESIDENTに「あなたはpresidentです。後述の要件を新たなPJフォルダをワークスペース内に作り、その中に、成果物を作成してください。」と入力"
+echo ""
+echo "  5. 🔄 環境終了:"
+echo "     # 個別セッション終了"
+echo "     tmux kill-session -t multiagent    # multiagentセッションのみ終了"
+echo "     tmux kill-session -t president     # presidentセッションのみ終了"
+echo ""
+echo "     # 全tmuxサーバー終了（全セッション一括終了）"
+echo "     tmux kill-server                   # 全てのtmuxセッションを終了" 

@@ -1,0 +1,243 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>The Nexus Platform - 次世代IT企業</title>
+    <link rel="stylesheet" href="styles.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+</head>
+<body>
+    <!-- Neural Network Loading Screen -->
+    <div id="neural-loader" class="neural-loader">
+        <div class="neural-pulse"></div>
+        <div class="loader-text">Initializing Neural Network...</div>
+    </div>
+
+    <!-- Header Navigation -->
+    <header class="neural-header">
+        <nav class="neural-nav">
+            <div class="logo">
+                <span class="logo-text">NEXUS</span>
+                <div class="logo-pulse"></div>
+            </div>
+            <ul class="nav-links">
+                <li><a href="#home" class="nav-link" data-section="home">HOME</a></li>
+                <li><a href="#about" class="nav-link" data-section="about">ABOUT</a></li>
+                <li><a href="#technology" class="nav-link" data-section="technology">TECHNOLOGY</a></li>
+                <li><a href="#careers" class="nav-link" data-section="careers">CAREERS</a></li>
+                <li><a href="#contact" class="nav-link" data-section="contact">CONTACT</a></li>
+            </ul>
+            <div class="neural-burger">
+                <span></span>
+                <span></span>
+                <span></span>
+            </div>
+        </nav>
+    </header>
+
+    <!-- Main Neural Network Container -->
+    <main class="neural-main">
+        <!-- 3D Neural Network Background -->
+        <canvas id="neural-canvas" class="neural-canvas"></canvas>
+        
+        <!-- Neural Network Navigator -->
+        <div id="neural-navigator" class="neural-navigator">
+            <div class="neural-nodes">
+                <div class="neural-node" data-section="home">
+                    <div class="node-core"></div>
+                    <div class="node-label">HOME</div>
+                </div>
+                <div class="neural-node" data-section="about">
+                    <div class="node-core"></div>
+                    <div class="node-label">ABOUT</div>
+                </div>
+                <div class="neural-node" data-section="technology">
+                    <div class="node-core"></div>
+                    <div class="node-label">TECH</div>
+                </div>
+                <div class="neural-node" data-section="careers">
+                    <div class="node-core"></div>
+                    <div class="node-label">CAREERS</div>
+                </div>
+                <div class="neural-node" data-section="contact">
+                    <div class="node-core"></div>
+                    <div class="node-label">CONTACT</div>
+                </div>
+            </div>
+            <svg class="neural-connections" width="100%" height="100%">
+                <!-- Neural connections will be generated dynamically -->
+            </svg>
+        </div>
+
+        <!-- Content Sections -->
+        <section id="home" class="neural-section active">
+            <div class="section-content">
+                <h1 class="neural-title">
+                    <span class="title-line">THE FUTURE OF</span>
+                    <span class="title-line">TECHNOLOGY</span>
+                    <span class="title-line">STARTS HERE</span>
+                </h1>
+                <p class="neural-subtitle">
+                    We are The Nexus Platform - where artificial intelligence meets human creativity
+                </p>
+                <div class="neural-cta">
+                    <button class="cta-button primary">Explore Neural Network</button>
+                    <button class="cta-button secondary">Watch Demo</button>
+                </div>
+            </div>
+            <div class="neural-stats">
+                <div class="stat-item">
+                    <div class="stat-number" data-count="99.9">0</div>
+                    <div class="stat-label">% Uptime</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-number" data-count="10000">0</div>
+                    <div class="stat-label">Neural Processes</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-number" data-count="247">0</div>
+                    <div class="stat-label">AI Models</div>
+                </div>
+            </div>
+        </section>
+
+        <section id="about" class="neural-section">
+            <div class="section-content">
+                <h2 class="section-title">Neural Intelligence</h2>
+                <div class="about-grid">
+                    <div class="about-card">
+                        <div class="card-icon">🧠</div>
+                        <h3>Cognitive Computing</h3>
+                        <p>Advanced AI systems that think, learn, and adapt like the human brain</p>
+                    </div>
+                    <div class="about-card">
+                        <div class="card-icon">⚡</div>
+                        <h3>Quantum Processing</h3>
+                        <p>Leveraging quantum mechanics for unprecedented computational power</p>
+                    </div>
+                    <div class="about-card">
+                        <div class="card-icon">🔬</div>
+                        <h3>Neural Networks</h3>
+                        <p>Deep learning architectures inspired by biological neural networks</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section id="technology" class="neural-section">
+            <div class="section-content">
+                <h2 class="section-title">Technology Stack</h2>
+                <div class="tech-grid">
+                    <div class="tech-item">
+                        <div class="tech-icon">AI</div>
+                        <div class="tech-label">Artificial Intelligence</div>
+                    </div>
+                    <div class="tech-item">
+                        <div class="tech-icon">ML</div>
+                        <div class="tech-label">Machine Learning</div>
+                    </div>
+                    <div class="tech-item">
+                        <div class="tech-icon">DL</div>
+                        <div class="tech-label">Deep Learning</div>
+                    </div>
+                    <div class="tech-item">
+                        <div class="tech-icon">NLP</div>
+                        <div class="tech-label">Natural Language Processing</div>
+                    </div>
+                    <div class="tech-item">
+                        <div class="tech-icon">CV</div>
+                        <div class="tech-label">Computer Vision</div>
+                    </div>
+                    <div class="tech-item">
+                        <div class="tech-icon">QC</div>
+                        <div class="tech-label">Quantum Computing</div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section id="careers" class="neural-section">
+            <div class="section-content">
+                <h2 class="section-title">Join Our Neural Network</h2>
+                <div class="careers-content">
+                    <div class="career-card">
+                        <h3>AI Research Engineer</h3>
+                        <p>Push the boundaries of artificial intelligence research</p>
+                        <div class="career-tags">
+                            <span class="tag">Python</span>
+                            <span class="tag">TensorFlow</span>
+                            <span class="tag">PyTorch</span>
+                        </div>
+                    </div>
+                    <div class="career-card">
+                        <h3>Quantum Developer</h3>
+                        <p>Develop next-generation quantum computing applications</p>
+                        <div class="career-tags">
+                            <span class="tag">Qiskit</span>
+                            <span class="tag">Quantum</span>
+                            <span class="tag">Physics</span>
+                        </div>
+                    </div>
+                    <div class="career-card">
+                        <h3>Neural Network Architect</h3>
+                        <p>Design and implement cutting-edge neural architectures</p>
+                        <div class="career-tags">
+                            <span class="tag">Deep Learning</span>
+                            <span class="tag">Neural Networks</span>
+                            <span class="tag">Research</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section id="contact" class="neural-section">
+            <div class="section-content">
+                <h2 class="section-title">Connect to the Network</h2>
+                <div class="contact-content">
+                    <div class="contact-info">
+                        <div class="contact-item">
+                            <div class="contact-icon">📧</div>
+                            <div class="contact-text">contact@nexusplatform.ai</div>
+                        </div>
+                        <div class="contact-item">
+                            <div class="contact-icon">📱</div>
+                            <div class="contact-text">+1 (555) 123-NEXUS</div>
+                        </div>
+                        <div class="contact-item">
+                            <div class="contact-icon">🌐</div>
+                            <div class="contact-text">Tokyo, Japan</div>
+                        </div>
+                    </div>
+                    <div class="contact-form">
+                        <input type="text" placeholder="Your Name" class="neural-input">
+                        <input type="email" placeholder="Your Email" class="neural-input">
+                        <textarea placeholder="Your Message" class="neural-textarea"></textarea>
+                        <button class="cta-button primary">Send Message</button>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <!-- Neural Activity Monitor -->
+    <div class="neural-monitor">
+        <div class="monitor-item">
+            <span class="monitor-label">Neural Activity:</span>
+            <span class="monitor-value">127.3 Hz</span>
+        </div>
+        <div class="monitor-item">
+            <span class="monitor-label">Connections:</span>
+            <span class="monitor-value">45,892</span>
+        </div>
+        <div class="monitor-item">
+            <span class="monitor-label">Processing:</span>
+            <span class="monitor-value">Real-time</span>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>

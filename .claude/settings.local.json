@@ -12,6 +12,19 @@
       "Bash(then)",
       "Bash(else)"
     ],
-    "deny": []
+    "deny": [
+      "Bash(rm:-rf:/*)",
+      "Bash(rm:-rf:/)*",
+      "Bash(rm:/*)",
+      "Bash(rmdir:/*)",
+      "Bash(mv:/:*)",
+      "Bash(chmod:*:/*)",
+      "Bash(chown:*:/*)",
+      "Bash(sudo:rm:*)",
+      "Bash(sudo:rmdir:*)",
+      "Bash(sudo:mv:*)",
+      "Bash(sudo:chmod:*)",
+      "Bash(sudo:chown:*)"
+    ]
   }
 }

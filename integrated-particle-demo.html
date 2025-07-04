@@ -1,0 +1,483 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>革新的パーティクル物理演算デモ</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            background: #000;
+            font-family: Arial, sans-serif;
+            overflow: hidden;
+        }
+        
+        #demo-container {
+            position: relative;
+            width: 100vw;
+            height: 100vh;
+        }
+        
+        canvas {
+            position: absolute;
+            top: 0;
+            left: 0;
+            cursor: crosshair;
+        }
+        
+        #controls {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            background: rgba(0, 0, 0, 0.8);
+            padding: 15px;
+            border-radius: 10px;
+            color: white;
+            font-size: 12px;
+            z-index: 1000;
+        }
+        
+        .control-group {
+            margin-bottom: 15px;
+        }
+        
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+        }
+        
+        input[type="range"] {
+            width: 150px;
+            margin-bottom: 5px;
+        }
+        
+        button {
+            background: #4CAF50;
+            color: white;
+            border: none;
+            padding: 8px 12px;
+            border-radius: 5px;
+            cursor: pointer;
+            margin: 2px;
+            font-size: 11px;
+        }
+        
+        button:hover {
+            background: #45a049;
+        }
+        
+        button.active {
+            background: #ff6b6b;
+        }
+        
+        #performance-info {
+            position: absolute;
+            top: 10px;
+            left: 10px;
+            background: rgba(0, 0, 0, 0.8);
+            padding: 10px;
+            border-radius: 5px;
+            color: #00ff00;
+            font-family: monospace;
+            font-size: 12px;
+            z-index: 1000;
+        }
+        
+        #instructions {
+            position: absolute;
+            bottom: 10px;
+            left: 10px;
+            background: rgba(0, 0, 0, 0.8);
+            padding: 10px;
+            border-radius: 5px;
+            color: white;
+            font-size: 12px;
+            max-width: 300px;
+            z-index: 1000;
+        }
+    </style>
+</head>
+<body>
+    <div id="demo-container">
+        <canvas id="main-canvas"></canvas>
+        
+        <div id="controls">
+            <div class="control-group">
+                <label>物理演算システム</label>
+                <button id="quantum-btn" class="active">量子共鳴</button>
+                <button id="fractal-btn">フラクタル爆発</button>
+                <button id="fluid-btn">流体力学</button>
+                <button id="webgl-btn">WebGL高速化</button>
+            </div>
+            
+            <div class="control-group">
+                <label>パーティクル数: <span id="particle-count-display">1000</span></label>
+                <input type="range" id="particle-count" min="100" max="10000" value="1000" step="100">
+            </div>
+            
+            <div class="control-group">
+                <label>物理強度: <span id="physics-intensity-display">1.0</span></label>
+                <input type="range" id="physics-intensity" min="0.1" max="3.0" value="1.0" step="0.1">
+            </div>
+            
+            <div class="control-group">
+                <label>視覚効果</label>
+                <button id="bloom-btn">ブルーム効果</button>
+                <button id="trail-btn">軌跡エフェクト</button>
+                <button id="glow-btn" class="active">光る効果</button>
+            </div>
+            
+            <div class="control-group">
+                <button id="reset-btn">リセット</button>
+                <button id="fullscreen-btn">フルスクリーン</button>
+            </div>
+        </div>
+        
+        <div id="performance-info">
+            <div>FPS: <span id="fps-display">60</span></div>
+            <div>Particles: <span id="active-particles">1000</span></div>
+            <div>Physics: <span id="physics-type">Quantum</span></div>
+            <div>GPU: <span id="gpu-usage">N/A</span></div>
+        </div>
+        
+        <div id="instructions">
+            <strong>操作方法:</strong><br>
+            • マウス移動: パーティクルを引き寄せる<br>
+            • クリック: 爆発を発生させる<br>
+            • 右クリック: 文字を形成<br>
+            • スペース: 一時停止/再開<br>
+            • 1-4キー: 物理演算切り替え
+        </div>
+    </div>
+
+    <script src="quantum-particle-system.js"></script>
+    <script src="fractal-explosion-engine.js"></script>
+    <script src="fluid-dynamics-simulation.js"></script>
+    <script src="webgl-gpu-accelerated-particles.js"></script>
+    
+    <script>
+        class IntegratedParticleDemo {
+            constructor() {
+                this.canvas = document.getElementById('main-canvas');
+                this.ctx = this.canvas.getContext('2d');
+                this.resizeCanvas();
+                
+                this.currentSystem = 'quantum';
+                this.systems = {};
+                this.paused = false;
+                this.mouseX = 0;
+                this.mouseY = 0;
+                this.lastTime = performance.now();
+                this.frameCount = 0;
+                this.fps = 60;
+                
+                // 視覚効果フラグ
+                this.effectsEnabled = {
+                    bloom: false,
+                    trail: false,
+                    glow: true
+                };
+                
+                this.initializeSystems();
+                this.setupEventListeners();
+                this.setupPerformanceMonitoring();
+                this.animate();
+            }
+            
+            resizeCanvas() {
+                this.canvas.width = window.innerWidth;
+                this.canvas.height = window.innerHeight;
+            }
+            
+            initializeSystems() {
+                try {
+                    // 量子共鳴パーティクル
+                    this.systems.quantum = new QuantumParticleSystem(this.canvas);
+                    
+                    // フラクタル爆発エンジン
+                    this.systems.fractal = new FractalExplosionEngine(this.canvas);
+                    
+                    // 流体力学シミュレーション
+                    this.systems.fluid = new FluidDynamicsSimulation(this.canvas);
+                    
+                    // WebGL高速化システム
+                    if (this.canvas.getContext('webgl2')) {
+                        this.systems.webgl = new WebGLParticleSystem(this.canvas);
+                    }
+                } catch (error) {
+                    console.error('システム初期化エラー:', error);
+                }
+            }
+            
+            setupEventListeners() {
+                // マウスイベント
+                this.canvas.addEventListener('mousemove', (e) => {
+                    const rect = this.canvas.getBoundingClientRect();
+                    this.mouseX = e.clientX - rect.left;
+                    this.mouseY = e.clientY - rect.top;
+                    
+                    // 各システムにマウス位置を通知
+                    Object.values(this.systems).forEach(system => {
+                        if (system.setMousePosition) {
+                            system.setMousePosition(this.mouseX, this.mouseY);
+                        }
+                    });
+                });
+                
+                this.canvas.addEventListener('click', (e) => {
+                    const rect = this.canvas.getBoundingClientRect();
+                    const x = e.clientX - rect.left;
+                    const y = e.clientY - rect.top;
+                    
+                    this.handleClick(x, y);
+                });
+                
+                this.canvas.addEventListener('contextmenu', (e) => {
+                    e.preventDefault();
+                    const rect = this.canvas.getBoundingClientRect();
+                    const x = e.clientX - rect.left;
+                    const y = e.clientY - rect.top;
+                    
+                    this.handleRightClick(x, y);
+                });
+                
+                // キーボードイベント
+                document.addEventListener('keydown', (e) => {
+                    switch(e.key) {
+                        case ' ':
+                            this.paused = !this.paused;
+                            break;
+                        case '1':
+                            this.switchSystem('quantum');
+                            break;
+                        case '2':
+                            this.switchSystem('fractal');
+                            break;
+                        case '3':
+                            this.switchSystem('fluid');
+                            break;
+                        case '4':
+                            this.switchSystem('webgl');
+                            break;
+                    }
+                });
+                
+                // コントロールパネル
+                document.getElementById('quantum-btn').addEventListener('click', () => this.switchSystem('quantum'));
+                document.getElementById('fractal-btn').addEventListener('click', () => this.switchSystem('fractal'));
+                document.getElementById('fluid-btn').addEventListener('click', () => this.switchSystem('fluid'));
+                document.getElementById('webgl-btn').addEventListener('click', () => this.switchSystem('webgl'));
+                
+                // パーティクル数制御
+                const particleCountSlider = document.getElementById('particle-count');
+                particleCountSlider.addEventListener('input', (e) => {
+                    const count = parseInt(e.target.value);
+                    document.getElementById('particle-count-display').textContent = count;
+                    this.setParticleCount(count);
+                });
+                
+                // 物理強度制御
+                const physicsIntensitySlider = document.getElementById('physics-intensity');
+                physicsIntensitySlider.addEventListener('input', (e) => {
+                    const intensity = parseFloat(e.target.value);
+                    document.getElementById('physics-intensity-display').textContent = intensity.toFixed(1);
+                    this.setPhysicsIntensity(intensity);
+                });
+                
+                // 視覚効果ボタン
+                document.getElementById('bloom-btn').addEventListener('click', () => this.toggleEffect('bloom'));
+                document.getElementById('trail-btn').addEventListener('click', () => this.toggleEffect('trail'));
+                document.getElementById('glow-btn').addEventListener('click', () => this.toggleEffect('glow'));
+                
+                // その他のボタン
+                document.getElementById('reset-btn').addEventListener('click', () => this.reset());
+                document.getElementById('fullscreen-btn').addEventListener('click', () => this.toggleFullscreen());
+                
+                // ウィンドウリサイズ
+                window.addEventListener('resize', () => {
+                    this.resizeCanvas();
+                    this.initializeSystems();
+                });
+            }
+            
+            handleClick(x, y) {
+                const system = this.systems[this.currentSystem];
+                
+                switch(this.currentSystem) {
+                    case 'quantum':
+                        // 量子収束を誘発
+                        if (system.particles) {
+                            system.particles.forEach(particle => {
+                                const dx = x - particle.position.x;
+                                const dy = y - particle.position.y;
+                                const distance = Math.sqrt(dx * dx + dy * dy);
+                                if (distance < 100) {
+                                    particle.collapse();
+                                }
+                            });
+                        }
+                        break;
+                    case 'fractal':
+                        // フラクタル爆発を生成
+                        if (system.createExplosion) {
+                            system.createExplosion(x, y, 1.5, 0, 4);
+                        }
+                        break;
+                    case 'fluid':
+                        // 流体を追加
+                        if (system.addParticles) {
+                            system.addParticles(x, y, 30);
+                        }
+                        break;
+                    case 'webgl':
+                        // WebGLシステムにクリックイベントを送信
+                        if (system.handleClick) {
+                            system.handleClick(x, y);
+                        }
+                        break;
+                }
+            }
+            
+            handleRightClick(x, y) {
+                const system = this.systems[this.currentSystem];
+                
+                if (this.currentSystem === 'quantum' && system.formText) {
+                    const texts = ['QUANTUM', 'FRACTAL', 'FLUID', 'GPU'];
+                    const randomText = texts[Math.floor(Math.random() * texts.length)];
+                    system.formText(randomText, x - 100, y - 50);
+                }
+            }
+            
+            switchSystem(systemName) {
+                if (this.systems[systemName]) {
+                    this.currentSystem = systemName;
+                    
+                    // UIボタンの状態を更新
+                    document.querySelectorAll('#controls button').forEach(btn => {
+                        btn.classList.remove('active');
+                    });
+                    document.getElementById(systemName + '-btn').classList.add('active');
+                    
+                    // パフォーマンス情報を更新
+                    document.getElementById('physics-type').textContent = systemName.charAt(0).toUpperCase() + systemName.slice(1);
+                }
+            }
+            
+            setParticleCount(count) {
+                const system = this.systems[this.currentSystem];
+                if (system.setParticleCount) {
+                    system.setParticleCount(count);
+                } else if (system.particleCount !== undefined) {
+                    system.particleCount = count;
+                }
+            }
+            
+            setPhysicsIntensity(intensity) {
+                const system = this.systems[this.currentSystem];
+                if (system.setPhysicsIntensity) {
+                    system.setPhysicsIntensity(intensity);
+                }
+            }
+            
+            toggleEffect(effectName) {
+                this.effectsEnabled[effectName] = !this.effectsEnabled[effectName];
+                const btn = document.getElementById(effectName + '-btn');
+                btn.classList.toggle('active', this.effectsEnabled[effectName]);
+            }
+            
+            reset() {
+                this.initializeSystems();
+                this.switchSystem('quantum');
+            }
+            
+            toggleFullscreen() {
+                if (!document.fullscreenElement) {
+                    document.documentElement.requestFullscreen();
+                } else {
+                    document.exitFullscreen();
+                }
+            }
+            
+            setupPerformanceMonitoring() {
+                setInterval(() => {
+                    // FPS計算
+                    this.fps = Math.round(this.frameCount);
+                    this.frameCount = 0;
+                    
+                    // パフォーマンス情報更新
+                    document.getElementById('fps-display').textContent = this.fps;
+                    
+                    const system = this.systems[this.currentSystem];
+                    if (system.particles) {
+                        document.getElementById('active-particles').textContent = system.particles.length;
+                    } else if (system.activeParticles !== undefined) {
+                        document.getElementById('active-particles').textContent = system.activeParticles;
+                    }
+                    
+                    // GPU使用率（WebGLの場合）
+                    if (this.currentSystem === 'webgl') {
+                        document.getElementById('gpu-usage').textContent = 'Active';
+                    } else {
+                        document.getElementById('gpu-usage').textContent = 'CPU';
+                    }
+                }, 1000);
+            }
+            
+            applyVisualEffects() {
+                if (this.effectsEnabled.trail) {
+                    // 軌跡エフェクト
+                    this.ctx.save();
+                    this.ctx.globalAlpha = 0.1;
+                    this.ctx.fillStyle = '#000000';
+                    this.ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
+                    this.ctx.restore();
+                }
+                
+                if (this.effectsEnabled.bloom) {
+                    // ブルーム効果（簡易実装）
+                    this.ctx.save();
+                    this.ctx.globalCompositeOperation = 'lighter';
+                    this.ctx.filter = 'blur(3px)';
+                    this.ctx.drawImage(this.canvas, 0, 0);
+                    this.ctx.restore();
+                }
+            }
+            
+            animate() {
+                if (!this.paused) {
+                    const currentTime = performance.now();
+                    const deltaTime = (currentTime - this.lastTime) / 1000;
+                    this.lastTime = currentTime;
+                    
+                    // 現在のシステムを更新
+                    const system = this.systems[this.currentSystem];
+                    if (system && system.update) {
+                        system.update(deltaTime);
+                    }
+                    
+                    // 描画（WebGL以外）
+                    if (this.currentSystem !== 'webgl') {
+                        if (system && system.render) {
+                            system.render();
+                        }
+                    }
+                    
+                    // 視覚効果の適用
+                    this.applyVisualEffects();
+                    
+                    this.frameCount++;
+                }
+                
+                requestAnimationFrame(() => this.animate());
+            }
+        }
+        
+        // デモ開始
+        window.addEventListener('load', () => {
+            new IntegratedParticleDemo();
+        });
+    </script>
+</body>
+</html>
